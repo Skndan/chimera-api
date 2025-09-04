@@ -1,5 +1,6 @@
-package com.skndan;
+package com.skndan.resource;
 
+import com.skndan.service.TicketService;
 import com.skndan.entity.Paged;
 import com.skndan.entity.Theatre;
 import com.skndan.entity.Ticket;

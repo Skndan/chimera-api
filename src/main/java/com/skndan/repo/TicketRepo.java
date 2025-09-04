@@ -1,4 +1,4 @@
-package com.skndan;
+package com.skndan.repo;
 
 import com.skndan.entity.Paged;
 import io.quarkus.panache.common.Page;

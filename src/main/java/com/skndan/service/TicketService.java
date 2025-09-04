@@ -1,5 +1,6 @@
-package com.skndan;
+package com.skndan.service;
 
+import com.skndan.repo.TicketRepo;
 import com.skndan.entity.Paged;
 import com.skndan.entity.Ticket;
 import jakarta.enterprise.context.ApplicationScoped;
