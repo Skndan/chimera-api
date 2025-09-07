@@ -10,7 +10,7 @@ import jakarta.ws.rs.core.Response;
 
 import java.util.Arrays;
 
-@Path("/api/excel")
+@Path("/excel")
 public class ExcelResource {
 
     @GET

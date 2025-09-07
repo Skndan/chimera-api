@@ -8,7 +8,7 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 
-@Path("/api/ticket")
+@Path("/ticket")
 public class TicketResource {
 
     @Inject

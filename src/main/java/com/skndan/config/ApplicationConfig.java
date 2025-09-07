@@ -1,5 +1,6 @@
 package com.skndan.config;
 
+import jakarta.ws.rs.ApplicationPath;
 import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
 import org.eclipse.microprofile.openapi.annotations.enums.SecuritySchemeType;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
@@ -19,6 +20,6 @@ import jakarta.ws.rs.core.Application;
         scheme = "bearer",
         bearerFormat = "JWT"
 )
-
-public class OpenApiConfig extends Application {
+@ApplicationPath("/api")
+public class ApplicationConfig extends Application {
 }
