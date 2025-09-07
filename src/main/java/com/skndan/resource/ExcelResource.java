@@ -1,25 +1,17 @@
 package com.skndan.resource;
 
-import com.skndan.ai.Bot;
-import com.skndan.entity.Ticket;
 import com.skndan.model.CellUpdate;
 import com.skndan.model.LlmResponse;
 import com.skndan.model.Payload;
 import com.skndan.model.TargetInfo;
-import com.skndan.service.TicketService;
-import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
 
 import java.util.Arrays;
 
-@Path("/ai")
-public class AiResource {
-
-//    @Inject
-//    Bot bot;
+@Path("/api/excel")
+public class ExcelResource {
 
     @GET
     @Path("/cell")
