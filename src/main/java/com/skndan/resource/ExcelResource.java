@@ -1,7 +1,7 @@
 package com.skndan.resource;
 
 import com.skndan.model.CellUpdate;
-import com.skndan.model.LlmResponse;
+import com.skndan.model.LlmResponseModel;
 import com.skndan.model.Payload;
 import com.skndan.model.TargetInfo;
 import jakarta.ws.rs.GET;
@@ -16,7 +16,7 @@ public class ExcelResource {
     @GET
     @Path("/cell")
     public Response mockCell() {
-        LlmResponse res = new LlmResponse();
+        LlmResponseModel res = new LlmResponseModel();
         res.setType("cell");
 
         TargetInfo target = new TargetInfo();
@@ -35,7 +35,7 @@ public class ExcelResource {
     @GET
     @Path("/table")
     public Response mockTable() {
-        LlmResponse res = new LlmResponse();
+        LlmResponseModel res = new LlmResponseModel();
         res.setType("table");
 
         TargetInfo target = new TargetInfo();
@@ -59,7 +59,7 @@ public class ExcelResource {
     @GET
     @Path("/new-table")
     public Response mockNewTable() {
-        LlmResponse res = new LlmResponse();
+        LlmResponseModel res = new LlmResponseModel();
         res.setType("new_table");
 
         TargetInfo target = new TargetInfo();
@@ -83,7 +83,7 @@ public class ExcelResource {
     @GET
     @Path("/update-table")
     public Response mockUpdateTable() {
-        LlmResponse res = new LlmResponse();
+        LlmResponseModel res = new LlmResponseModel();
         res.setType("update_table");
 
         TargetInfo target = new TargetInfo();

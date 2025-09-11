@@ -3,7 +3,7 @@ package com.skndan.model;
 import lombok.Data;
 
 @Data
-public class LlmResponse {
+public class LlmResponseModel {
     private String type; // cell, table, new_table, update_table
     private TargetInfo target;
     private Payload payload;
