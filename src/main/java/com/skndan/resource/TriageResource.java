@@ -1,5 +1,6 @@
 package com.skndan.resource;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.skndan.ai.AiChimeraBot;
 import com.skndan.ai.TriageService;
 import com.skndan.model.record.ChatRequest;

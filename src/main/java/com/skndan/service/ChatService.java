@@ -1,5 +1,7 @@
 package com.skndan.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skndan.ai.AiChimeraBot;
 import com.skndan.entity.ChatMessage;
 import com.skndan.entity.ChatRoom;
@@ -30,6 +32,9 @@ public class ChatService {
 
     @Inject
     AiChimeraBot bot; // LangChain4j generated AI service
+
+    @Inject
+    ObjectMapper objectMapper; // Quarkus provides this via CDI
 
     private static final Logger LOG = Logger.getLogger(ChatService.class);
 
@@ -99,8 +104,17 @@ public class ChatService {
         // 5) Persist assistant reply (Postgres + Redis)
         if (llmResponse != null) {
             // Choose what to save: use payload.text() or payload.cell.value/formula depending on schema
-            String assistantText = llmResponse.payload() != null ? llmResponse.payload().text() : null;
-            if (assistantText == null) assistantText = "<no-text-from-llm>";
+
+            String assistantText = "<no-text-from-llm>";
+
+            try {
+                assistantText = objectMapper.writeValueAsString(llmResponse);
+            } catch (JsonProcessingException jx) {
+                LOG.error(jx.getMessage());
+            }
+
+//            String assistantText = llmResponse.payload() != null ? llmResponse.payload().text() : null;
+//            if (assistantText == null) assistantText = "<no-text-from-llm>";
 
             var aiMsg = new ChatMessage();
             aiMsg.chatRoom = room;
