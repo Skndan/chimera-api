@@ -35,6 +35,14 @@ public class ChatService {
 
     public LlmResponse chat(String userId, ChatRequest req) {
 
+        LOG.info("---------------------START-----------------------");
+        LOG.info("prompt: "+req.prompt());
+        LOG.info("sheet: "+req.sheet());
+        LOG.info("cell: "+req.cell());
+        LOG.info("roomName: "+req.roomName());
+        LOG.info("selectionType: "+req.selectionType());
+        LOG.info("----------------------END------------------------");
+
         // Ensure ChatRoom exists (simplified)
         var room = roomRepo.find("userId = ?1 and name = ?2", userId, req.roomName())
                 .firstResult();
