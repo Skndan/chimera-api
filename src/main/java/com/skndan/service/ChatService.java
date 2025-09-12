@@ -12,6 +12,7 @@ import com.skndan.repo.ChatRoomRepo;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.SecurityContext;
+import org.jboss.logging.Logger;
 
 import java.util.List;
 
@@ -30,6 +31,7 @@ public class ChatService {
     @Inject
     AiChimeraBot bot; // LangChain4j generated AI service
 
+    private static final Logger LOG = Logger.getLogger(ChatService.class);
 
     public LlmResponse chat(String userId, ChatRequest req) {
 
@@ -75,6 +77,10 @@ public class ChatService {
             // Uncomment the correct call depending on your Bot interface.
             // llmResponse = bot.chat(userId, inputForModel); // If Bot.chat(memoryId, prompt)
 
+
+            LOG.info("---------------------START-----------------------");
+            LOG.info(inputForModel);
+            LOG.info("----------------------END------------------------");
             // Option B: Bot.chat(String prompt) -> pass flattened context in the prompt
             llmResponse = bot.chat(req.selectionType(), req.cell(), req.range(), req.sheet(), inputForModel); // If Bot.chat(prompt) only
         } catch (Exception ex) {
