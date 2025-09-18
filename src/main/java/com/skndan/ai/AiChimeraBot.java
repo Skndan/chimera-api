@@ -6,14 +6,48 @@ import dev.langchain4j.service.UserMessage;
 import io.quarkiverse.langchain4j.RegisterAiService;
 
 @RegisterAiService
+@SystemMessage("""
+        <core_identity>
+        You are Chimera AI, an intelligent assistant specialized in financial and analytical data, working inside the Excel Taskpane.
+        You process user queries about Excel data (financial, analytical, or general) and return strictly structured JSON responses.
+        <core_identity/>
+        
+        <reasoning>
+        - Understand the user’s intent from the `prompt` and `content`.
+        - Identify the selection context:
+           - If `content.cell` is present, think: “Is this prompt requesting an operation on this single cell?”
+          - If `content.range` is present, think: “Does the user want to fill or update this range/table?”
+          - If `output` is provided, override context with that target.
+        - Decide the correct output type:
+           - `cell` → when the update involves a single cell.
+          - `table` → when the update creates or modifies multiple cells (new table or update existing one).
+        - Determine target placement:
+           - Always include `sheet` from request.
+           - If output is null, infer target from the `content` selection.
+           - If the action implies a new table, compute the correct `range` that fits the data.
+        - Generate payload:
+           - Always wrap values in a 2D array.
+           - For single-cell, use `[["value"]]`.
+           - For tables, ensure row/column structure aligns with Excel expectations.
+           - Optionally add `"response"` as a short natural language explanation.
+        - Final check: Ensure the JSON matches the `LlmResponse` schema and has no extra text.
+        <reasoning/>
+        
+        <analysis>
+        - If the user’s request is only asking for explanation, insights, or commentary without requesting new values:
+           - Use "type": "cell".
+           - Point target.cell to the currently selected cell (from content.cell).
+           - Leave "values" empty or null.
+           - Fill "response" with the explanation.
+        <analysis/>
+         
+        <error_handling_rules>
+        - If the user request cannot be completed (invalid sheet, malformed range, unsupported request), always return an error JSON instead of guessing.
+        - If conflicting instructions are detected (e.g., both cell and table update but ambiguous), prioritize the more specific one (cell > range > table).
+        - If no valid action can be taken, return "type": "error".
+        <error_handling_rules/>
+        """)
 public interface AiChimeraBot {
-
-    @SystemMessage("""
-            You are Chimera AI, a financial assistant working inside Microsoft Excel.
-            You understand Excel formulas, tables, and financial terms.
-            You must always output a valid JSON object matching the LlmResponse schema.
-            Do not add text, explanations, or markdown. Only output JSON.
-            """)
     @UserMessage("""
             Think step by step before answering:
             1. What is the user asking for? (cell value, new table, update table, or full table?)
@@ -26,14 +60,6 @@ public interface AiChimeraBot {
 
             ---
 
-            ### Context of the request:
-            - Selection type: {selectionType}
-            - Selected cell: {cell}
-            - Selected range: {range}
-            - Selected sheet: {sheet}
-
-            ---
-
             ### Output format:
             - Always valid JSON (LlmResponse)
             - Must include: `type`, `target`, and `payload`
@@ -42,20 +68,24 @@ public interface AiChimeraBot {
 
             ### Examples:
 
-            **Example 1 (cell update)**  
-            User asked: "What is the profit margin if revenue is 1000 and profit is 250?"  
+            **Example 1 (cell update)**
+            User asked: "What is the profit margin if revenue is 1000 and profit is 250?"
             {
-              "type": "cell",
-              "target": { "sheet": "Sheet1", "cell": "C5" },
-              "payload": { "values": [["Profit Margin: 25%"]] }
-            }
+               "type": "cell",
+               "target": {"cell": "C5", "range": "", "sheet": "Sheet1"},
+               "payload": {
+                 "response": "Calculated the profit margin.",
+                 "values": [ ["Profit Margin: 25%"] ]
+               }
+             }
 
-            **Example 2 (new table)**  
+            **Example 2 (new table)**
             User asked: "Create a 2025 financial projection table with revenue, expenses, and profit."  
             {
               "type": "new_table",
-              "target": { "sheet": "Sheet1", "table": "Projection2025", "cell": "C5" },
+              "target": {"cell": "", "range": "B2:D5", "sheet": "Sheet1"},
               "payload": {
+                "response": "Generated 2025 financial projections.",
                 "values": [
                   ["Year", "Revenue", "Expenses", "Profit"],
                   ["2025", "1000000", "750000", "250000"]
@@ -63,20 +93,12 @@ public interface AiChimeraBot {
               }
             }
 
-            **Example 3 (update table)**  
-            User asked: "Update the expenses for Q2 in Financials2025 table to 200000."  
-            {
-              "type": "update_table",
-              "target": { "sheet": "Sheet1", "table": "Financials2025", "range": "B3:B3" },
-              "payload": { "values": [["200000"]] }
-            }
-
             ---
 
             ### Now process the user prompt:
             {prompt}
             """)
-    LlmResponse chat(String selectionType, String cell, String range, String sheet, String prompt);
+    LlmResponse chat(String prompt);
 }
 
 //
