@@ -6,14 +6,13 @@ import com.skndan.ai.AiChimeraBot;
 import com.skndan.entity.ChatMessage;
 import com.skndan.entity.ChatRoom;
 import com.skndan.entity.constant.Role;
-import com.skndan.model.record.ChatRequest;
 import com.skndan.model.record.LlmResponse;
+import com.skndan.model.request.LlmRequest;
 import com.skndan.provider.RedisMemoryProvider;
 import com.skndan.repo.ChatMessageRepo;
 import com.skndan.repo.ChatRoomRepo;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.core.SecurityContext;
 import org.jboss.logging.Logger;
 
 import java.util.List;
@@ -38,23 +37,20 @@ public class ChatService {
 
     private static final Logger LOG = Logger.getLogger(ChatService.class);
 
-    public LlmResponse chat(String userId, ChatRequest req) {
+    public LlmResponse chat(String userId, LlmRequest req) {
 
         LOG.info("---------------------START-----------------------");
-        LOG.info("prompt: "+req.prompt());
-        LOG.info("sheet: "+req.sheet());
-        LOG.info("cell: "+req.cell());
-        LOG.info("roomName: "+req.roomName());
-        LOG.info("selectionType: "+req.selectionType());
+        LOG.info("prompt: " + req.toString());
         LOG.info("----------------------END------------------------");
 
         // Ensure ChatRoom exists (simplified)
-        var room = roomRepo.find("userId = ?1 and name = ?2", userId, req.roomName())
+        var room = roomRepo.find("userId = ?1 and name = ?2", userId, req.getRoomName())
                 .firstResult();
+
         if (room == null) {
             room = new ChatRoom();
             room.userId = userId;
-            room.name = req.roomName();
+            room.name = req.getRoomName();
             roomRepo.persist(room);
         }
 
@@ -62,21 +58,21 @@ public class ChatService {
         var userMsg = new ChatMessage();
         userMsg.chatRoom = room;
         userMsg.sender = Role.USER;
-        userMsg.content = req.prompt();
+        userMsg.content = req.getPrompt();
         msgRepo.persist(userMsg);
 
-        redisMemory.saveMessage(userId, "User: " + req.prompt());
+        redisMemory.saveMessage(userId, "User: " + req.getPrompt());
 
         // 2) Get short-term memory from Redis and build a single string context
         List<String> mem = redisMemory.getMemory(userId); // List<String> like ["User: ...","AI: ..."]
         String memoryContext = buildMemoryContext(mem);
 
+
         // 3) Build the final model input (prompt + history)
-        String inputForModel;
-        if (memoryContext.isBlank()) {
-            inputForModel = req.prompt();
-        } else {
-            inputForModel = req.prompt()
+        String inputForModel = req.toString();
+
+        if (!memoryContext.isBlank()) {
+            inputForModel = inputForModel
                     + "\n\nConversationHistory:\n"
                     + memoryContext;
         }
@@ -95,7 +91,7 @@ public class ChatService {
             LOG.info(inputForModel);
             LOG.info("----------------------END------------------------");
             // Option B: Bot.chat(String prompt) -> pass flattened context in the prompt
-            llmResponse = bot.chat(req.selectionType(), req.cell(), req.range(), req.sheet(), inputForModel); // If Bot.chat(prompt) only
+            llmResponse = bot.chat(inputForModel); // If Bot.chat(prompt) only
         } catch (Exception ex) {
             // handle LLM errors appropriately (log/retry/fallback)
             throw new RuntimeException("LLM call failed", ex);

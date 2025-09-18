@@ -6,6 +6,7 @@ import com.skndan.ai.TriageService;
 import com.skndan.model.record.ChatRequest;
 import com.skndan.model.record.LlmResponse;
 import com.skndan.model.record.TriagedReview;
+import com.skndan.model.request.LlmRequest;
 import com.skndan.service.ChatService;
 import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
@@ -44,8 +45,7 @@ public class TriageResource {
     @Path("/chat")
     @Authenticated
     @Transactional
-    public LlmResponse triage2(ChatRequest req) {
-
+    public LlmResponse triage2(LlmRequest req) {
         String userId = identity.getPrincipal().getName();
         return chatService.chat(userId, req);
     }
