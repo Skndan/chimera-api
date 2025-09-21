@@ -100,6 +100,3 @@ public interface AiChimeraBot {
             """)
     LlmResponse chat(String prompt);
 }
-
-//
-//        - Selected table: {table}
