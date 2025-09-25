@@ -33,7 +33,7 @@ public class TicketService {
     }
 
     public Paged<Ticket> getTickets2(int page, int size, Long id) {
-        return repo.findAllPaged2(page, size, id);
+        return repo.findAllPagedById(page, size, id);
     }
 
 

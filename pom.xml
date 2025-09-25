@@ -79,9 +79,10 @@
       <groupId>io.quarkiverse.langchain4j</groupId>
       <artifactId>quarkus-langchain4j-ollama</artifactId>
     </dependency>
+
     <dependency>
       <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-websockets</artifactId>
+      <artifactId>quarkus-websockets-next</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>

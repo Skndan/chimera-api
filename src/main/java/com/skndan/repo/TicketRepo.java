@@ -22,7 +22,7 @@ public class TicketRepo extends BaseRepo<Ticket, Long> implements PanacheReposit
         return new Paged<>(ticketPaged, total, page, size);
     }
 
-    public Paged<Ticket> findAllPaged2(int page, int size, Long theatreId) {
+    public Paged<Ticket> findAllPagedById(int page, int size, Long theatreId) {
         return findPaged("active = ?1 and theatre.id = ?2", page, size, true, theatreId);
     }
 }

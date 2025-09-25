@@ -18,6 +18,4 @@ public class ChatRoom extends BaseEntity {
     @Column(nullable = false)
     public String name;
 
-    @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    public List<ChatMessage> messages;
 }

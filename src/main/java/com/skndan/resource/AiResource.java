@@ -17,17 +17,13 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.SecurityContext;
 
-@Path("/review")
-public class TriageResource {
+@Path("/ai")
+public class AiResource {
 
 //    public record ChatRequest(String roomName, String input) {}
 
     @Inject
     SecurityIdentity identity;
-
-
-    @Inject
-    TriageService triage;
 
     @Inject
     ChatService chatService;
@@ -36,16 +32,10 @@ public class TriageResource {
     }
 
     @POST
-    public TriagedReview triage(Review review) {
-        return triage.triage(review.review());
-    }
-
-
-    @POST
     @Path("/chat")
     @Authenticated
     @Transactional
-    public LlmResponse triage2(LlmRequest req) {
+    public LlmResponse chat(LlmRequest req) {
         String userId = identity.getPrincipal().getName();
         return chatService.chat(userId, req);
     }

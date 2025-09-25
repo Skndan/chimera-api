@@ -37,34 +37,34 @@ public class ChatService {
 
     private static final Logger LOG = Logger.getLogger(ChatService.class);
 
-    public LlmResponse chat(String userId, LlmRequest req) {
+    public LlmResponse chat(String roomId, LlmRequest req) {
 
         LOG.info("---------------------START-----------------------");
         LOG.info("prompt: " + req.toString());
         LOG.info("----------------------END------------------------");
 
         // Ensure ChatRoom exists (simplified)
-        var room = roomRepo.find("userId = ?1 and name = ?2", userId, req.getRoomName())
+        var room = roomRepo.find("id = ?1", roomId)
                 .firstResult();
-
-        if (room == null) {
-            room = new ChatRoom();
-            room.userId = userId;
-            room.name = req.getRoomName();
-            roomRepo.persist(room);
-        }
+//
+//        if (room == null) {
+//            room = new ChatRoom();
+//            room.userId = userId;
+//            room.name = req.getRoomName();
+//            roomRepo.persist(room);
+//        }
 
         // 1) Save user message into Postgres + Redis
         var userMsg = new ChatMessage();
         userMsg.chatRoom = room;
         userMsg.sender = Role.USER;
-        userMsg.content = req.getPrompt();
+        userMsg.content = req.toString();
         msgRepo.persist(userMsg);
 
-        redisMemory.saveMessage(userId, "User: " + req.getPrompt());
+        redisMemory.saveMessage(roomId, "User: " + req);
 
         // 2) Get short-term memory from Redis and build a single string context
-        List<String> mem = redisMemory.getMemory(userId); // List<String> like ["User: ...","AI: ..."]
+        List<String> mem = redisMemory.getMemory(roomId); // List<String> like ["User: ...","AI: ..."]
         String memoryContext = buildMemoryContext(mem);
 
 
@@ -118,7 +118,7 @@ public class ChatService {
             aiMsg.content = assistantText;
             msgRepo.persist(aiMsg);
 
-            redisMemory.saveMessage(userId, "AI: " + assistantText);
+            redisMemory.saveMessage(roomId, "AI: " + assistantText);
         }
 
         // 6) Return structured LlmResponse (caller will forward to VSTO)
