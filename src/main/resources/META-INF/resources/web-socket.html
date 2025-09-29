@@ -117,7 +117,9 @@
         $("#msg").focus();
       };
       socket.onmessage = function (m) {
+        console.log(m.data);
         const chatMessage = JSON.parse(m.data);
+        console.log(chatMessage)
         let chat = $("#chat");
         switch (chatMessage.type) {
           case "USER_JOINED":

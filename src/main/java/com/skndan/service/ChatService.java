@@ -37,7 +37,7 @@ public class ChatService {
 
     private static final Logger LOG = Logger.getLogger(ChatService.class);
 
-    public LlmResponse chat(String roomId, LlmRequest req) {
+    public LlmResponse chat(long roomId, LlmRequest req) {
 
         LOG.info("---------------------START-----------------------");
         LOG.info("prompt: " + req.toString());
@@ -61,10 +61,10 @@ public class ChatService {
         userMsg.content = req.toString();
         msgRepo.persist(userMsg);
 
-        redisMemory.saveMessage(roomId, "User: " + req);
+        redisMemory.saveMessage(String.valueOf(roomId), "User: " + req);
 
         // 2) Get short-term memory from Redis and build a single string context
-        List<String> mem = redisMemory.getMemory(roomId); // List<String> like ["User: ...","AI: ..."]
+        List<String> mem = redisMemory.getMemory(String.valueOf(roomId)); // List<String> like ["User: ...","AI: ..."]
         String memoryContext = buildMemoryContext(mem);
 
 
@@ -118,7 +118,7 @@ public class ChatService {
             aiMsg.content = assistantText;
             msgRepo.persist(aiMsg);
 
-            redisMemory.saveMessage(roomId, "AI: " + assistantText);
+            redisMemory.saveMessage(String.valueOf(roomId), "AI: " + assistantText);
         }
 
         // 6) Return structured LlmResponse (caller will forward to VSTO)

@@ -10,7 +10,7 @@ public class LlmRequest {
     String prompt;  // The user’s actual query
     Content content;
     Output output;
-    String roomName;
+    long roomId;
 
     @Override
     public String toString() {

@@ -36,8 +36,7 @@ public class AiResource {
     @Authenticated
     @Transactional
     public LlmResponse chat(LlmRequest req) {
-        String userId = identity.getPrincipal().getName();
-        return chatService.chat(userId, req);
+        return chatService.chat(req.getRoomId(), req);
     }
 
 }
