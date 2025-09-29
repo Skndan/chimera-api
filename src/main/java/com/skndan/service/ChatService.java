@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skndan.ai.AiChimeraBot;
 import com.skndan.entity.ChatMessage;
-import com.skndan.entity.ChatRoom;
 import com.skndan.entity.constant.Role;
 import com.skndan.model.record.LlmResponse;
 import com.skndan.model.request.LlmRequest;
