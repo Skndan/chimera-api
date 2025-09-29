@@ -16,6 +16,10 @@ import org.jboss.logging.Logger;
 
 import java.util.List;
 
+/**
+ * Service for managing chat interactions, including AI-powered conversations.
+ * Handles message processing, storage, and interaction with AI services.
+ */
 @ApplicationScoped
 public class ChatService {
 
@@ -36,6 +40,15 @@ public class ChatService {
 
     private static final Logger LOG = Logger.getLogger(ChatService.class);
 
+    /**
+     * Processes a chat message by integrating user input with AI-generated responses.
+     * Manages conversation context, saves messages, and interacts with the AI service.
+     *
+     * @param roomId the unique identifier of the chat room
+     * @param req the chat request containing user message details
+     * @return an AI-generated response based on the conversation context
+     * @throws RuntimeException if the AI service call fails
+     */
     public LlmResponse chat(long roomId, LlmRequest req) {
 
         LOG.info("---------------------START-----------------------");
@@ -117,6 +130,13 @@ public class ChatService {
         return llmResponse;
     }
 
+    /**
+     * Builds a conversation memory context from a list of previous messages.
+     * Converts the memory list into a single string for AI context.
+     *
+     * @param mem list of previous conversation messages
+     * @return a string representation of conversation history
+     */
     private String buildMemoryContext(List<String> mem) {
         if (mem == null || mem.isEmpty()) return "";
         StringBuilder sb = new StringBuilder();

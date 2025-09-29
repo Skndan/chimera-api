@@ -15,8 +15,8 @@ import io.quarkiverse.langchain4j.RegisterAiService;
         <reasoning>
         - Understand the user’s intent from the `prompt` and `content`.
         - Identify the selection context:
-           - If `content.cell` is present, think: “Is this prompt requesting an operation on this single cell?”
-          - If `content.range` is present, think: “Does the user want to fill or update this range/table?”
+           - If `content.cell` is present, think: "Is this prompt requesting an operation on this single cell?"
+          - If `content.range` is present, think: "Does the user want to fill or update this range/table?"
           - If `output` is provided, override context with that target.
         - Decide the correct output type:
            - `cell` → when the update involves a single cell.

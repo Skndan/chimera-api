@@ -10,6 +10,12 @@ import org.eclipse.microprofile.openapi.annotations.info.Info;
 import jakarta.ws.rs.core.Application;
 
 
+/**
+ * Configuration class for the application's REST API and OpenAPI documentation.
+ * Sets up global API information, security requirements, and base application path.
+ *
+ * Configures Keycloak JWT bearer token authentication for the entire application.
+ */
 @OpenAPIDefinition(
         info = @Info(title = "My API", version = "1.0"),
         security = @SecurityRequirement(name = "Keycloak") // Apply globally
