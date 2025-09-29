@@ -1,12 +1,12 @@
 package com.skndan.ai;
 
-import com.skndan.model.record.TriagedReview;
+import com.skndan.model.record.TestReview;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
 import io.quarkiverse.langchain4j.RegisterAiService;
 
 @RegisterAiService
-public interface TriageService {
+public interface TestAiService {
 
     @SystemMessage("""
             You are working for a bank. You are an AI processing reviews about financial products. You need to triage the reviews into positive and negative ones.
@@ -30,5 +30,5 @@ public interface TriageService {
             {review}
             ---
             """)
-    TriagedReview triage(String review);
+    TestReview triage(String review);
 }

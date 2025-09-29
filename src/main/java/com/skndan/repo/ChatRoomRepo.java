@@ -2,7 +2,6 @@ package com.skndan.repo;
 
 import com.skndan.entity.ChatRoom;
 import com.skndan.entity.Paged;
-import com.skndan.entity.Ticket;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 

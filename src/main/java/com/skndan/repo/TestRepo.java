@@ -10,7 +10,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import java.util.List;
 
 @ApplicationScoped
-public class TicketRepo extends BaseRepo<Ticket, Long> implements PanacheRepository<Ticket> {
+public class TestRepo extends BaseRepo<Ticket, Long> implements PanacheRepository<Ticket> {
 
     public Paged<Ticket> findAllPaged(int page, int size) {
 

@@ -47,7 +47,7 @@ import io.quarkiverse.langchain4j.RegisterAiService;
         - If no valid action can be taken, return "type": "error".
         <error_handling_rules/>
         """)
-public interface AiChimeraBot {
+public interface ExcelBot {
     @UserMessage("""
             Think step by step before answering:
             1. What is the user asking for? (cell value, new table, update table, or full table?)

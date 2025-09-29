@@ -1,6 +1,6 @@
 package com.skndan.service;
 
-import com.skndan.repo.TicketRepo;
+import com.skndan.repo.TestRepo;
 import com.skndan.entity.Paged;
 import com.skndan.entity.Ticket;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -8,10 +8,10 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 
 @ApplicationScoped
-public class TicketService {
+public class TestService {
 
     @Inject
-    TicketRepo repo;
+    TestRepo repo;
 
     @Transactional
     public Ticket createTicket(Ticket ticket) {

@@ -2,7 +2,7 @@ package com.skndan.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.skndan.ai.AiChimeraBot;
+import com.skndan.ai.ExcelBot;
 import com.skndan.entity.ChatMessage;
 import com.skndan.entity.constant.Role;
 import com.skndan.model.record.LlmResponse;
@@ -29,7 +29,7 @@ public class ChatService {
     ChatMessageRepo msgRepo;
 
     @Inject
-    AiChimeraBot bot; // LangChain4j generated AI service
+    ExcelBot bot; // LangChain4j generated AI service
 
     @Inject
     ObjectMapper objectMapper; // Quarkus provides this via CDI
@@ -45,13 +45,6 @@ public class ChatService {
         // Ensure ChatRoom exists (simplified)
         var room = roomRepo.find("id = ?1", roomId)
                 .firstResult();
-//
-//        if (room == null) {
-//            room = new ChatRoom();
-//            room.userId = userId;
-//            room.name = req.getRoomName();
-//            roomRepo.persist(room);
-//        }
 
         // 1) Save user message into Postgres + Redis
         var userMsg = new ChatMessage();

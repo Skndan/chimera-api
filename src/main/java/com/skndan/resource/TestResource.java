@@ -1,6 +1,6 @@
 package com.skndan.resource;
 
-import com.skndan.service.TicketService;
+import com.skndan.service.TestService;
 import com.skndan.entity.Paged;
 import com.skndan.entity.Theatre;
 import com.skndan.entity.Ticket;
@@ -9,15 +9,15 @@ import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 
 //@Path("/ticket")
-public class TicketResource {
+public class TestResource {
 
     @Inject
-    TicketService ticketService;
+    TestService testService;
 
     @GET
     @Path("{id}")
     public Ticket getTicket(@PathParam("id") Long id) {
-        return ticketService.getTicket(id);
+        return testService.getTicket(id);
     }
 
     @GET
@@ -27,7 +27,7 @@ public class TicketResource {
             @QueryParam("pageSize") @DefaultValue("25") int pageSize,
             @QueryParam("theatreId") @DefaultValue("0") Long theatreId
     ) {
-        return ticketService.getTickets2(pageNo, pageSize, theatreId);
+        return testService.getTickets2(pageNo, pageSize, theatreId);
     }
 
     @GET
@@ -37,12 +37,12 @@ public class TicketResource {
             @QueryParam("sortField") @DefaultValue("createdAt") String sortField,
             @QueryParam("sortDir") @DefaultValue("ASC") String sortDir
     ) {
-        return ticketService.getTickets(pageNo, pageSize);
+        return testService.getTickets(pageNo, pageSize);
     }
 
     @POST
     public Ticket createTicket(Ticket ticket) {
-        return ticketService.createTicket(ticket);
+        return testService.createTicket(ticket);
     }
 
     @POST
