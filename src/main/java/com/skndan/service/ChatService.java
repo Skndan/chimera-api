@@ -38,6 +38,9 @@ public class ChatService {
     @Inject
     ObjectMapper objectMapper; // Quarkus provides this via CDI
 
+    @Inject
+    EventService eventService;
+
     private static final Logger LOG = Logger.getLogger(ChatService.class);
 
     /**
@@ -55,6 +58,8 @@ public class ChatService {
         LOG.info("prompt: " + req.toString());
         LOG.info("----------------------END------------------------");
 
+        eventService.notify(String.valueOf(roomId), "status:RECEIVED");
+//        eventService.notify(String.valueOf(roomId), "status:RECEIVED");
         // Ensure ChatRoom exists (simplified)
         var room = roomRepo.find("id = ?1", roomId)
                 .firstResult();
@@ -82,6 +87,8 @@ public class ChatService {
                     + memoryContext;
         }
 
+        eventService.notify(String.valueOf(roomId), "status:MEMORY_CHECKED");
+
         // 4) Call the Bot (LLM) — two common signatures shown:
         // Option A: Bot.chat(@MemoryId String memoryId, String prompt)
         LlmResponse llmResponse = null;
@@ -95,9 +102,12 @@ public class ChatService {
             LOG.info("---------------------START-----------------------");
             LOG.info(inputForModel);
             LOG.info("----------------------END------------------------");
+            eventService.notify(String.valueOf(roomId), "status:GENERATING_RESPONSE");
+
             // Option B: Bot.chat(String prompt) -> pass flattened context in the prompt
             llmResponse = bot.chat(inputForModel); // If Bot.chat(prompt) only
         } catch (Exception ex) {
+            eventService.notify(String.valueOf(roomId), "status:ERROR");
             // handle LLM errors appropriately (log/retry/fallback)
             throw new RuntimeException("LLM call failed", ex);
         }
@@ -124,7 +134,10 @@ public class ChatService {
             msgRepo.persist(aiMsg);
 
             redisMemory.saveMessage(String.valueOf(roomId), "AI: " + assistantText);
+
+            eventService.notify(String.valueOf(roomId), "data:system:"+assistantText);
         }
+
 
         // 6) Return structured LlmResponse (caller will forward to VSTO)
         return llmResponse;

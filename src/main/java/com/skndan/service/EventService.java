@@ -24,6 +24,8 @@ public class EventService {
      * @return a stream of events that clients can listen to
      */
     public Multi<String> register(String roomId) {
+        System.out.println("Register << " + roomId);
+
         return Multi.createFrom().emitter(em -> {
             emitters.put(roomId, em);
         }, BackPressureStrategy.BUFFER);
@@ -33,13 +35,14 @@ public class EventService {
      * Sends a message to all clients subscribed to a specific chat room.
      * The message is formatted according to Server-Sent Events (SSE) standards.
      *
-     * @param roomId the unique identifier for the chat room
+     * @param roomId  the unique identifier for the chat room
      * @param message the content to send to subscribed clients
      */
     public void notify(String roomId, String message) {
+        System.out.println("Send >> " + roomId + " >> " + message);
         var em = emitters.get(roomId);
         if (em != null) {
-            em.emit("data: " + message + "\n\n"); // SSE format
+            em.emit(message + "\n\n"); // SSE format
         }
     }
 }

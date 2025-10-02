@@ -12,8 +12,8 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
  * @param payload the actual content or values to be inserted
  */
 @Schema(description = "Represents a response from a Language Learning Model (LLM) with Excel-specific output details")
-public record LlmResponse(
-        @Schema(description = "Type of response", example = "cell", type = SchemaType.STRING,
+public record  LlmResponse(
+        @Schema(description = "Type of response", examples = "cell", type = SchemaType.STRING,
                 enumeration = {"cell", "table", "new_table", "update_table"})
         String type,
         

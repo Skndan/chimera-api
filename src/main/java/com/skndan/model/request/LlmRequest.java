@@ -7,6 +7,7 @@ import java.util.Arrays;
 @Data
 public class LlmRequest {
 
+    String role;
     String prompt;  // The user’s actual query
     Content content;
     Output output;
