@@ -1,21 +1,25 @@
 package com.skndan.service;
 
-import com.skndan.ai.AiChimeraBot;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.skndan.ai.ExcelBot;
 import com.skndan.entity.ChatMessage;
-import com.skndan.entity.ChatRoom;
 import com.skndan.entity.constant.Role;
-import com.skndan.model.record.ChatRequest;
 import com.skndan.model.record.LlmResponse;
+import com.skndan.model.request.LlmRequest;
 import com.skndan.provider.RedisMemoryProvider;
 import com.skndan.repo.ChatMessageRepo;
 import com.skndan.repo.ChatRoomRepo;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.core.SecurityContext;
 import org.jboss.logging.Logger;
 
 import java.util.List;
 
+/**
+ * Service for managing chat interactions, including AI-powered conversations.
+ * Handles message processing, storage, and interaction with AI services.
+ */
 @ApplicationScoped
 public class ChatService {
 
@@ -29,44 +33,61 @@ public class ChatService {
     ChatMessageRepo msgRepo;
 
     @Inject
-    AiChimeraBot bot; // LangChain4j generated AI service
+    ExcelBot bot; // LangChain4j generated AI service
+
+    @Inject
+    ObjectMapper objectMapper; // Quarkus provides this via CDI
+
+    @Inject
+    EventService eventService;
 
     private static final Logger LOG = Logger.getLogger(ChatService.class);
 
-    public LlmResponse chat(String userId, ChatRequest req) {
+    /**
+     * Processes a chat message by integrating user input with AI-generated responses.
+     * Manages conversation context, saves messages, and interacts with the AI service.
+     *
+     * @param roomId the unique identifier of the chat room
+     * @param req the chat request containing user message details
+     * @return an AI-generated response based on the conversation context
+     * @throws RuntimeException if the AI service call fails
+     */
+    public LlmResponse chat(long roomId, LlmRequest req) {
 
+        LOG.info("---------------------START-----------------------");
+        LOG.info("prompt: " + req.toString());
+        LOG.info("----------------------END------------------------");
+
+        eventService.notify(String.valueOf(roomId), "status:RECEIVED");
+//        eventService.notify(String.valueOf(roomId), "status:RECEIVED");
         // Ensure ChatRoom exists (simplified)
-        var room = roomRepo.find("userId = ?1 and name = ?2", userId, req.roomName())
+        var room = roomRepo.find("id = ?1", roomId)
                 .firstResult();
-        if (room == null) {
-            room = new ChatRoom();
-            room.userId = userId;
-            room.name = req.roomName();
-            roomRepo.persist(room);
-        }
 
         // 1) Save user message into Postgres + Redis
         var userMsg = new ChatMessage();
         userMsg.chatRoom = room;
         userMsg.sender = Role.USER;
-        userMsg.content = req.prompt();
+        userMsg.content = req.toString();
         msgRepo.persist(userMsg);
 
-        redisMemory.saveMessage(userId, "User: " + req.prompt());
+        redisMemory.saveMessage(String.valueOf(roomId), "User: " + req);
 
         // 2) Get short-term memory from Redis and build a single string context
-        List<String> mem = redisMemory.getMemory(userId); // List<String> like ["User: ...","AI: ..."]
+        List<String> mem = redisMemory.getMemory(String.valueOf(roomId)); // List<String> like ["User: ...","AI: ..."]
         String memoryContext = buildMemoryContext(mem);
 
+
         // 3) Build the final model input (prompt + history)
-        String inputForModel;
-        if (memoryContext.isBlank()) {
-            inputForModel = req.prompt();
-        } else {
-            inputForModel = req.prompt()
+        String inputForModel = req.toString();
+
+        if (!memoryContext.isBlank()) {
+            inputForModel = inputForModel
                     + "\n\nConversationHistory:\n"
                     + memoryContext;
         }
+
+        eventService.notify(String.valueOf(roomId), "status:MEMORY_CHECKED");
 
         // 4) Call the Bot (LLM) — two common signatures shown:
         // Option A: Bot.chat(@MemoryId String memoryId, String prompt)
@@ -81,9 +102,12 @@ public class ChatService {
             LOG.info("---------------------START-----------------------");
             LOG.info(inputForModel);
             LOG.info("----------------------END------------------------");
+            eventService.notify(String.valueOf(roomId), "status:GENERATING_RESPONSE");
+
             // Option B: Bot.chat(String prompt) -> pass flattened context in the prompt
-            llmResponse = bot.chat(req.selectionType(), req.cell(), req.range(), req.sheet(), inputForModel); // If Bot.chat(prompt) only
+            llmResponse = bot.chat(inputForModel); // If Bot.chat(prompt) only
         } catch (Exception ex) {
+            eventService.notify(String.valueOf(roomId), "status:ERROR");
             // handle LLM errors appropriately (log/retry/fallback)
             throw new RuntimeException("LLM call failed", ex);
         }
@@ -91,8 +115,17 @@ public class ChatService {
         // 5) Persist assistant reply (Postgres + Redis)
         if (llmResponse != null) {
             // Choose what to save: use payload.text() or payload.cell.value/formula depending on schema
-            String assistantText = llmResponse.payload() != null ? llmResponse.payload().text() : null;
-            if (assistantText == null) assistantText = "<no-text-from-llm>";
+
+            String assistantText = "<no-text-from-llm>";
+
+            try {
+                assistantText = objectMapper.writeValueAsString(llmResponse);
+            } catch (JsonProcessingException jx) {
+                LOG.error(jx.getMessage());
+            }
+
+//            String assistantText = llmResponse.payload() != null ? llmResponse.payload().text() : null;
+//            if (assistantText == null) assistantText = "<no-text-from-llm>";
 
             var aiMsg = new ChatMessage();
             aiMsg.chatRoom = room;
@@ -100,13 +133,23 @@ public class ChatService {
             aiMsg.content = assistantText;
             msgRepo.persist(aiMsg);
 
-            redisMemory.saveMessage(userId, "AI: " + assistantText);
+            redisMemory.saveMessage(String.valueOf(roomId), "AI: " + assistantText);
+
+            eventService.notify(String.valueOf(roomId), "data:system:"+assistantText);
         }
+
 
         // 6) Return structured LlmResponse (caller will forward to VSTO)
         return llmResponse;
     }
 
+    /**
+     * Builds a conversation memory context from a list of previous messages.
+     * Converts the memory list into a single string for AI context.
+     *
+     * @param mem list of previous conversation messages
+     * @return a string representation of conversation history
+     */
     private String buildMemoryContext(List<String> mem) {
         if (mem == null || mem.isEmpty()) return "";
         StringBuilder sb = new StringBuilder();

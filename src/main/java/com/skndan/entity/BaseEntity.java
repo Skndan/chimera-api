@@ -2,21 +2,21 @@ package com.skndan.entity;
 
 
 import java.util.Date;
-import java.util.UUID;
-
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Base entity class providing common fields and behaviors for all database entities.
+ * Extends PanacheEntityBase for simplified JPA operations and includes standard
+ * tracking fields like creation and update timestamps.
+ */
 @MappedSuperclass
 @Getter
 @Setter
@@ -39,11 +39,18 @@ public abstract class BaseEntity extends PanacheEntityBase {
     @Column(columnDefinition = "boolean default true")
     public Boolean active = true;
 
+    /**
+     * Automatically sets creation timestamp when a new entity is first persisted.
+     * Initializes both createdAt and updatedAt with the current date.
+     */
     @PrePersist
     protected void onCreate() {
         updatedAt = createdAt = new Date();
     }
 
+    /**
+     * Automatically updates the updatedAt timestamp whenever the entity is modified.
+     */
     @PreUpdate
     protected void onUpdate() {
         updatedAt = new Date();

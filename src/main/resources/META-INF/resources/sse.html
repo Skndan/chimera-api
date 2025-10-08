@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SSE Test</title>
+</head>
+<body>
+<h2>SSE Chat Room Test</h2>
+<div>
+  <input id="roomId" value="room1" />
+  <button onclick="connect()">Connect</button>
+</div>
+<div id="messages" style="margin-top:20px; border:1px solid #ccc; padding:10px; width:300px; height:200px; overflow:auto;"></div>
+
+<script>
+  let evtSource;
+
+  function connect() {
+    const roomId = document.getElementById("roomId").value;
+    const url = `/api/events/room/${roomId}`;
+
+    evtSource = new EventSource(url);
+
+    evtSource.onopen = () => {
+      console.log("Connected to SSE:", url);
+      addMessage("Connected to room " + roomId);
+    };
+
+    evtSource.onmessage = (event) => {
+      console.log("Message:", event.data);
+      addMessage(event.data);
+    };
+
+    evtSource.onerror = (err) => {
+      console.error("SSE error:", err);
+      addMessage("Error, disconnected.");
+      evtSource.close();
+    };
+  }
+
+  function addMessage(msg) {
+    const messagesDiv = document.getElementById("messages");
+    const p = document.createElement("p");
+    p.textContent = msg;
+    messagesDiv.appendChild(p);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+</script>
+</body>
+</html>

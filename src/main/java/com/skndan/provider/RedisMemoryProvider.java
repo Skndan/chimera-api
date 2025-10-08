@@ -1,40 +1,62 @@
 package com.skndan.provider;
 
-import dev.langchain4j.memory.ChatMemory;
-import dev.langchain4j.memory.chat.*;
-import io.quarkus.redis.client.RedisClient;
-import io.quarkus.redis.datasource.RedisDataSource;
-import io.quarkus.redis.datasource.list.ListCommands;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.redisson.api.RList;
+import org.redisson.api.RedissonClient;
+import org.redisson.client.codec.StringCodec;
 
 import java.util.List;
 
+/**
+ * Provider for managing short-term memory storage using Redis.
+ * Handles saving, retrieving, and clearing message histories for chat interactions.
+ */
 @ApplicationScoped
 public class RedisMemoryProvider {
 
-    private final ListCommands<String, String> list;
-
     @Inject
-    public RedisMemoryProvider(RedisDataSource ds) {
-        this.list = ds.list(String.class);
-    }
+    RedissonClient redisson;
 
     private static final String PREFIX = "chat:memory:";
 
+    /**
+     * Saves a message to the user's memory list in Redis.
+     * Maintains a rolling window of the most recent 20 messages.
+     *
+     * @param userId unique identifier for the user
+     * @param message the message to be stored
+     */
     public void saveMessage(String userId, String message) {
         String key = PREFIX + userId;
-        list.rpush(key, message);
-        list.ltrim(key, -20, -1); // keep only last 20 messages
+        RList<String> list = redisson.getList(key);
+        list.add(message);
+
+        // Keep only last 20 messages
+        if (list.size() > 20) {
+            list.trim(list.size() - 20, list.size() - 1);
+        }
     }
 
+    /**
+     * Retrieves the entire message history for a specific user.
+     *
+     * @param userId unique identifier for the user
+     * @return list of messages stored in the user's memory
+     */
     public List<String> getMemory(String userId) {
         String key = PREFIX + userId;
-        return list.lrange(key, 0, -1);
+        RList<String> list = redisson.getList(key, StringCodec.INSTANCE);
+        return list.readAll();
     }
 
-//    public void clear(String userId) {
-//        String key = PREFIX + userId;
-//        list.del(key);
-//    }
+    /**
+     * Clears the entire message history for a specific user.
+     *
+     * @param userId unique identifier for the user
+     */
+    public void clear(String userId) {
+        String key = PREFIX + userId;
+        redisson.getList(key).delete();
+    }
 }
