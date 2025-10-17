@@ -1,6 +1,7 @@
 package com.skndan.ai;
 
 import com.skndan.model.record.LlmResponse;
+import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
 import io.quarkiverse.langchain4j.RegisterAiService;
@@ -98,5 +99,5 @@ public interface ExcelBot {
             ### Now process the user prompt:
             {prompt}
             """)
-    LlmResponse chat(String prompt);
+    LlmResponse chat(@MemoryId String memoryId, String prompt);
 }

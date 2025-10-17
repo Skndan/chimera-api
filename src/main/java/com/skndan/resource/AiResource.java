@@ -3,7 +3,6 @@ package com.skndan.resource;
 import com.skndan.model.record.LlmResponse;
 import com.skndan.model.request.LlmRequest;
 import com.skndan.service.ChatService;
-import com.skndan.service.EventService;
 import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.inject.Inject;

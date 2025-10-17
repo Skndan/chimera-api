@@ -70,22 +70,22 @@ public class ChatService {
         userMsg.sender = Role.USER;
         userMsg.content = req.toString();
         msgRepo.persist(userMsg);
-
-        redisMemory.saveMessage(String.valueOf(roomId), "User: " + req);
-
-        // 2) Get short-term memory from Redis and build a single string context
-        List<String> mem = redisMemory.getMemory(String.valueOf(roomId)); // List<String> like ["User: ...","AI: ..."]
-        String memoryContext = buildMemoryContext(mem);
+//
+//        redisMemory.saveMessage(String.valueOf(roomId), "User: " + req);
+//
+//        // 2) Get short-term memory from Redis and build a single string context
+//        List<String> mem = redisMemory.getMemory(String.valueOf(roomId)); // List<String> like ["User: ...","AI: ..."]
+//        String memoryContext = buildMemoryContext(mem);
 
 
         // 3) Build the final model input (prompt + history)
         String inputForModel = req.toString();
 
-        if (!memoryContext.isBlank()) {
-            inputForModel = inputForModel
-                    + "\n\nConversationHistory:\n"
-                    + memoryContext;
-        }
+//        if (!memoryContext.isBlank()) {
+//            inputForModel = inputForModel
+//                    + "\n\nConversationHistory:\n"
+//                    + memoryContext;
+//        }
 
         eventService.notify(String.valueOf(roomId), "status:MEMORY_CHECKED");
 
@@ -105,7 +105,7 @@ public class ChatService {
             eventService.notify(String.valueOf(roomId), "status:GENERATING_RESPONSE");
 
             // Option B: Bot.chat(String prompt) -> pass flattened context in the prompt
-            llmResponse = bot.chat(inputForModel); // If Bot.chat(prompt) only
+            llmResponse = bot.chat(String.valueOf(roomId), inputForModel); // If Bot.chat(prompt) only
         } catch (Exception ex) {
             eventService.notify(String.valueOf(roomId), "status:ERROR");
             // handle LLM errors appropriately (log/retry/fallback)
@@ -133,7 +133,7 @@ public class ChatService {
             aiMsg.content = assistantText;
             msgRepo.persist(aiMsg);
 
-            redisMemory.saveMessage(String.valueOf(roomId), "AI: " + assistantText);
+//            redisMemory.saveMessage(String.valueOf(roomId), "AI: " + assistantText);
 
             eventService.notify(String.valueOf(roomId), "data:system:"+assistantText);
         }
