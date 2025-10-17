@@ -99,5 +99,5 @@ public interface ExcelBot {
             ### Now process the user prompt:
             {prompt}
             """)
-    LlmResponse chat(@MemoryId String memoryId, String prompt);
+    LlmResponse chat(@MemoryId long memoryId, String prompt);
 }

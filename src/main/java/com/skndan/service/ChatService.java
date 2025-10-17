@@ -10,6 +10,7 @@ import com.skndan.model.request.LlmRequest;
 import com.skndan.provider.RedisMemoryProvider;
 import com.skndan.repo.ChatMessageRepo;
 import com.skndan.repo.ChatRoomRepo;
+import io.quarkiverse.langchain4j.ModelName;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.jboss.logging.Logger;
@@ -33,6 +34,7 @@ public class ChatService {
     ChatMessageRepo msgRepo;
 
     @Inject
+    @ModelName("m1")
     ExcelBot bot; // LangChain4j generated AI service
 
     @Inject
@@ -48,7 +50,7 @@ public class ChatService {
      * Manages conversation context, saves messages, and interacts with the AI service.
      *
      * @param roomId the unique identifier of the chat room
-     * @param req the chat request containing user message details
+     * @param req    the chat request containing user message details
      * @return an AI-generated response based on the conversation context
      * @throws RuntimeException if the AI service call fails
      */
@@ -105,7 +107,7 @@ public class ChatService {
             eventService.notify(String.valueOf(roomId), "status:GENERATING_RESPONSE");
 
             // Option B: Bot.chat(String prompt) -> pass flattened context in the prompt
-            llmResponse = bot.chat(String.valueOf(roomId), inputForModel); // If Bot.chat(prompt) only
+            llmResponse = bot.chat(roomId, inputForModel); // If Bot.chat(prompt) only
         } catch (Exception ex) {
             eventService.notify(String.valueOf(roomId), "status:ERROR");
             // handle LLM errors appropriately (log/retry/fallback)
@@ -135,7 +137,7 @@ public class ChatService {
 
 //            redisMemory.saveMessage(String.valueOf(roomId), "AI: " + assistantText);
 
-            eventService.notify(String.valueOf(roomId), "data:system:"+assistantText);
+            eventService.notify(String.valueOf(roomId), "data:system:" + assistantText);
         }
 
 

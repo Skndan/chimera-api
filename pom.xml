@@ -76,10 +76,6 @@
       <version>3.51.0</version>
     </dependency>
     <dependency>
-      <groupId>io.quarkiverse.langchain4j</groupId>
-      <artifactId>quarkus-langchain4j-ollama</artifactId>
-    </dependency>
-    <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-junit5</artifactId>
       <scope>test</scope>
