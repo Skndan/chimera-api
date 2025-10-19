@@ -19,8 +19,8 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
  * Provides operations to retrieve, create, and manage test data.
  * Note: Currently commented out path suggests this might be a test or development resource.
  */
-@Path("/ticket")
-@Tag(name = "Test Tickets", description = "Operations for testing ticket management")
+//@Path("/ticket")
+//@Tag(name = "Test Tickets", description = "Operations for testing ticket management")
 public class TestResource {
 
     @Inject

@@ -9,6 +9,7 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
@@ -25,7 +26,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 public class AiResource {
 
     @Inject
-    SecurityIdentity identity;
+    JsonWebToken jwt;
 
     @Inject
     ChatService chatService;
@@ -70,7 +71,8 @@ public class AiResource {
         ) LlmRequest req
     ) {
         System.out.println("Chat request details: "+req);
-        return chatService.chat(req.getRoomId(), req);
+        String uid = jwt.getSubject();
+        return chatService.chat(req.getRoomId(), req, uid);
     }
 
 }

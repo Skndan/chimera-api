@@ -4,10 +4,9 @@ import com.skndan.model.record.LlmResponse;
 import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
-import io.quarkiverse.langchain4j.ModelName;
 import io.quarkiverse.langchain4j.RegisterAiService;
 
-@RegisterAiService
+@RegisterAiService(modelName = "m2")
 @SystemMessage("""
         <core_identity>
         You are Chimera AI, an intelligent assistant specialized in financial and analytical data, working inside the Excel Taskpane.
@@ -49,7 +48,7 @@ import io.quarkiverse.langchain4j.RegisterAiService;
         - If no valid action can be taken, return "type": "error".
         <error_handling_rules/>
         """)
-public interface ExcelBot {
+public interface ExcelBotM2 {
     @UserMessage("""
             Think step by step before answering:
             1. What is the user asking for? (cell value, new table, update table, or full table?)

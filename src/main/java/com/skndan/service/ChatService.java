@@ -3,16 +3,20 @@ package com.skndan.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skndan.ai.ExcelBot;
+import com.skndan.ai.ExcelBotM2;
+import com.skndan.ai.ExcelBotM3;
 import com.skndan.entity.ChatMessage;
+import com.skndan.entity.Settings;
 import com.skndan.entity.constant.Role;
 import com.skndan.model.record.LlmResponse;
 import com.skndan.model.request.LlmRequest;
 import com.skndan.provider.RedisMemoryProvider;
 import com.skndan.repo.ChatMessageRepo;
 import com.skndan.repo.ChatRoomRepo;
-import io.quarkiverse.langchain4j.ModelName;
+import com.skndan.repo.SettingsRepo;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
 import java.util.List;
@@ -34,14 +38,25 @@ public class ChatService {
     ChatMessageRepo msgRepo;
 
     @Inject
-    @ModelName("m1")
-    ExcelBot bot; // LangChain4j generated AI service
+    ExcelBot bot;
+
+    @Inject
+    ExcelBotM2 botM2;
+
+    @Inject
+    ExcelBotM3 botM3;
 
     @Inject
     ObjectMapper objectMapper; // Quarkus provides this via CDI
 
     @Inject
     EventService eventService;
+
+    @Inject
+    SettingsRepo settingsRepo;
+
+    @ConfigProperty(name = "chimera.default.model", defaultValue = "openai/gpt-4o-mini")
+    String defaultModel;
 
     private static final Logger LOG = Logger.getLogger(ChatService.class);
 
@@ -51,14 +66,17 @@ public class ChatService {
      *
      * @param roomId the unique identifier of the chat room
      * @param req    the chat request containing user message details
+     * @param uid
      * @return an AI-generated response based on the conversation context
      * @throws RuntimeException if the AI service call fails
      */
-    public LlmResponse chat(long roomId, LlmRequest req) {
+    public LlmResponse chat(long roomId, LlmRequest req, String uid) {
 
         LOG.info("---------------------START-----------------------");
         LOG.info("prompt: " + req.toString());
         LOG.info("----------------------END------------------------");
+
+        Settings settings = settingsRepo.find("profileId", uid).firstResult();
 
         eventService.notify(String.valueOf(roomId), "status:RECEIVED");
 //        eventService.notify(String.valueOf(roomId), "status:RECEIVED");
@@ -106,8 +124,18 @@ public class ChatService {
             LOG.info("----------------------END------------------------");
             eventService.notify(String.valueOf(roomId), "status:GENERATING_RESPONSE");
 
-            // Option B: Bot.chat(String prompt) -> pass flattened context in the prompt
-            llmResponse = bot.chat(roomId, inputForModel); // If Bot.chat(prompt) only
+
+            if (settings != null) {
+                defaultModel = settings.getModelName();
+            }
+
+            llmResponse = switch (defaultModel) {
+                case "anthropic/claude-sonnet-4.5" -> botM2.chat(roomId, inputForModel); // If Bot.chat(prompt) only
+                case "google/gemini-2.5-flash" -> botM3.chat(roomId, inputForModel); // If Bot.chat(prompt) only
+                default -> bot.chat(roomId, inputForModel);
+            };
+
+
         } catch (Exception ex) {
             eventService.notify(String.valueOf(roomId), "status:ERROR");
             // handle LLM errors appropriately (log/retry/fallback)

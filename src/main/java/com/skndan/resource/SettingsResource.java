@@ -57,11 +57,9 @@ public class SettingsResource {
     }
 
     @GET
-    public Response list(
-            @QueryParam("page") @DefaultValue("0") int page,
-            @QueryParam("size") @DefaultValue("10") int size) {
-        UUID ownerId = UUID.fromString(jwt.getSubject());
-        Paged<Settings> workspaces = repo.findByOwnerId(ownerId, page, size);
+    public Response getByProfileId() {
+        UUID profileId = UUID.fromString(jwt.getSubject());
+        Settings workspaces = repo.find("profileId", profileId).firstResult();
         return Response.ok(workspaces).build();
     }
 
