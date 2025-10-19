@@ -2,6 +2,7 @@ package com.skndan.resource;
 
 
 import com.skndan.entity.Settings;
+import jakarta.ws.rs.POST;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
@@ -33,7 +34,7 @@ public class MeResource {
     @ConfigProperty(name = "chimera.default.model", defaultValue = "openai/gpt-4o-mini")
     String defaultModel;
 
-    @GET
+    @POST
     @Transactional
     public Response getOrCreateProfile() {
         String uid = jwt.getSubject();
