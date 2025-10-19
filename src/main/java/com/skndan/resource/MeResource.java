@@ -1,6 +1,8 @@
 package com.skndan.resource;
 
 
+import com.skndan.entity.Settings;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import com.skndan.entity.Profile;
@@ -15,6 +17,8 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import java.util.UUID;
+
 @Path("/v1/me")
 @Authenticated
 @Produces(MediaType.APPLICATION_JSON)
@@ -25,6 +29,9 @@ public class MeResource {
 
     @Inject
     ProfileRepo repo;
+
+    @ConfigProperty(name = "chimera.default.model", defaultValue = "openai/gpt-4o-mini")
+    String defaultModel;
 
     @GET
     @Transactional
@@ -39,7 +46,12 @@ public class MeResource {
             profile.email = email;
             profile.name = name;
             profile.id = uid;
-            profile.persist();
+            profile.persistAndFlush();
+
+            Settings settings = new Settings();
+            settings.setProfileId(UUID.fromString(profile.id));
+            settings.setModelName(defaultModel);
+            settings.persistAndFlush();
         }
 
         return Response.ok(profile).build();
