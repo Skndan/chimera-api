@@ -1,6 +1,5 @@
 package com.skndan.resource;
 
-import com.skndan.entity.Paged;
 import com.skndan.entity.Settings;
 import com.skndan.repo.SettingsRepo;
 import com.skndan.utils.EntityCopyUtils;

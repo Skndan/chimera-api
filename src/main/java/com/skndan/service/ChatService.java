@@ -19,8 +19,6 @@ import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
-import java.util.List;
-
 /**
  * Service for managing chat interactions, including AI-powered conversations.
  * Handles message processing, storage, and interaction with AI services.
@@ -180,12 +178,12 @@ public class ChatService {
      * @param mem list of previous conversation messages
      * @return a string representation of conversation history
      */
-    private String buildMemoryContext(List<String> mem) {
-        if (mem == null || mem.isEmpty()) return "";
-        StringBuilder sb = new StringBuilder();
-        for (String line : mem) {
-            sb.append(line).append("\n");
-        }
-        return sb.toString();
-    }
+    // private String buildMemoryContext(List<String> mem) {
+    //     if (mem == null || mem.isEmpty()) return "";
+    //     StringBuilder sb = new StringBuilder();
+    //     for (String line : mem) {
+    //         sb.append(line).append("\n");
+    //     }
+    //     return sb.toString();
+    // }
 }

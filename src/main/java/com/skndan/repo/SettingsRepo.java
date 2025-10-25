@@ -1,14 +1,8 @@
 package com.skndan.repo;
 
-import com.skndan.entity.Paged;
 import com.skndan.entity.Settings;
-import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
-import io.quarkus.panache.common.Page;
 import jakarta.enterprise.context.ApplicationScoped;
-
-import java.util.List;
-import java.util.UUID;
 
 @ApplicationScoped
 public class SettingsRepo extends BaseRepo<Settings, Long> implements PanacheRepository<Settings> {

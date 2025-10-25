@@ -4,7 +4,6 @@ import com.skndan.model.record.LlmResponse;
 import com.skndan.model.request.LlmRequest;
 import com.skndan.service.ChatService;
 import io.quarkus.security.Authenticated;
-import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
